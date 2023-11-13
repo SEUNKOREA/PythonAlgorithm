@@ -37,7 +37,3 @@ for idx, dist in enumerate(distance):
 
 if check == False:
     print(-1)
-
-    
-
-
