@@ -1,31 +1,13 @@
-from itertools import product
-
 n = int(input())
-data = [] # (time, price, None)
-for _ in range(n):
-    temp = list(map(int, input().split()))
-    temp.append(None)
-    data.append(temp)
+array = [list(map(int, input().split())) for _ in range(n)]
 
-first = data[:]
-first[0][2] = True
-second = data[:]
-second[0][2] = False
+d = [0 for _ in range(n+1)]
 
-for array in [first, second]:
-    for i in range(n):
-        if array[i][2] == None:
-            if array[i][0] <= n-i:
-                data[i][2] = True
-                answer += data[i][1]
-                for j in range(i+1, i+1+data[i][0]-1):
-                    data[j][2] = False
-            else:
-                data[i][2] = False
-                print("pass")
-        
-        for i in range(n):
-            print(data[i])
-        print()
+for i in range(n-1, -1, -1):
+    ### 가능여부 확인
+    if n-i >= array[i][0]:
+        d[i] = max(array[i][1]+d[i+array[i][0]], d[i+1])
+    else:
+        d[i] = d[i+1]
 
-print(answer)
+print(d[0])
