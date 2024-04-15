@@ -1,87 +1,86 @@
 """
-BOJ 14303 로봇청소기
-출처: https://www.acmicpc.net/problem/14503
+BOJ 14503 로봇청소기
+https://www.acmicpc.net/problem/14503
 """
+import sys
+sys.stdin = open('input.txt', 'r')
 
+
+### BFS 풀이
 from collections import deque
 
-# import sys
-# sys.stdin = open('input.txt', 'r')
-
-def turn_left(direction):
-    if direction == 0:
-        direction = 3
+def turn_left(d):
+    if d == 0:
+        return 3
     else:
-        direction -= 1
-    return direction
+        return d-1
 
-# 방의 크기
-n, m = map(int, input().split())
+di = [-1, 0, 1, 0]
+dj = [0, 1, 0, -1]
 
-# 로봇 청소기의 초기 위치와 방향
-init_x, init_y, init_d = map(int, input().split())
-# 방향 북동남서(0123)
-dx = [-1, 0, 1, 0]
-dy = [0, 1, 0, -1]
+N, M = map(int, input().split())
+r, c, d = map(int, input().split())
+arr = [list(map(int, input().split())) for _ in range(N)]
 
-# 방의 정보 입력받음
-array = [list(map(int, input().split())) for _ in range(n)]
+q = deque()
+q.append((r, c))
 
-# 작동을 멈출때까지 청소하는 칸의 개수
-answer = 0
+cnt = 0
 
-def bfs():
-    global answer
+while q:
+    ci, cj = q.popleft()
 
-    # 방문해야할 좌표를 담을 큐
-    q = deque()
-    q.append((init_x, init_y, init_d))
+    if arr[ci][cj] == 0:  # 현재 칸 청소 X 라면
+        arr[ci][cj] = 2   # 현재 칸 청소
+        cnt += 1
 
-    while q:
-        x, y, direction = q.popleft()
+    found = False
+    for _ in range(4):
 
-        if array[x][y] == 0: # 청소되지 않은 빈칸이라면
-            array[x][y] = 2 # 청소 진행 >> 청소완료 빈칸(즉, 방문처리)
-            answer += 1
+        d = turn_left(d)
+        ni = ci + di[d]
+        nj = cj + dj[d]
+        if arr[ni][nj] == 0:
+            q.append((ni, nj))
+            found = True
+            break
 
-        # for a in array:
-        #     print(a)
-        # print()
-        # 주변 4칸 중 청소되지 않은 빈칸이 있는지 확인한다.
-        found = False
-        for i in range(4):
-            nx = x + dx[i]
-            ny = y + dy[i]
-            if 0 <= nx < n and 0 <= ny < m: # 방안에 있는 경우
-                if array[nx][ny] == 0: # 주변 4칸 중에 청소되지 않은 빈칸 발견
-                    found = True
-                    break
-
-        # 주변 4칸 중에 청소되지 않은 빈칸 발견
-        if found:
-            while True:
-                direction = turn_left(direction)
-                nx = x + dx[direction]
-                ny = y + dy[direction]
-                if 0 <= nx < n and 0 <= ny < m:
-                    if array[nx][ny] == 0:
-                        q.append((nx, ny, direction))
-                        break
-        # 주변 4칸 중 청소되지 않은 빈칸이 없는 경우
+    if not found:
+        ni = ci - di[d]
+        nj = cj - dj[d]
+        if arr[ni][nj] != 1:
+            q.append((ni, nj))
         else:
-            # 바라보는 방향을 유지한채로 한칸 후진한 칸 계산
-            nx = x - dx[direction]
-            ny = y - dy[direction]
-            # 후진한 칸이 방안
-            if 0 <= nx < n and 0 <= ny < m:
-                if array[nx][ny] == 1:
-                    return
-                else:
-                    q.append((nx, ny, direction))
-            else: # 방을 벗어난 경우
-                return
-bfs()
-print(answer)
+            break
+
+print(cnt)
 
 
 
+### DFS 풀이
+di = [-1, 0, 1, 0]
+dj = [0, 1, 0, -1]
+
+def solve(si, sj, dr):
+    global ans
+    if arr[si][sj] == 0:
+        arr[si][sj] = 2
+        ans += 1
+    for i in range(4):
+        dr = (dr + 3) % 4
+        ni, nj = si+di[dr], sj+dj[dr]
+        if arr[ni][nj] == 0:
+            return solve(ni, nj, dr)
+    ni, nj = si-di[dr], sj-dj[dr]
+    if arr[ni][nj] != 1:
+        return solve(ni, nj, dr)
+    else:
+        return
+
+N, M = map(int, input().split())
+si, sj, dr = map(int, input().split())
+arr = [list(map(int, input().split())) for _ in range(N)]
+
+ans = 0
+solve(si, sj, dr)
+print(ans)
